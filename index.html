@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapule Mbuzwana — Full Stack Developer</title>
+<meta name="description" content="Full Stack Developer and Design Engineer building thoughtful, well-crafted digital products.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS — clean, neutral, restrained (matches reference design)
+   ============================================================ */
+:root{
+  --bg: #FFFFFF;
+  --ink: #18181B;
+  --soft: #71717A;
+  --faint: #A1A1AA;
+  --line: #E4E4E7;
+  --line-strong: #D4D4D8;
+  --surface: #FFFFFF;
+  --surface-hover: #FAFAFA;
+  --accent: #2563EB;
+  --tag-bg: #F4F4F5;
+  --grid-line: rgba(37,99,235,0.05);
+  --grid-line-strong: rgba(37,99,235,0.10);
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --edge: clamp(20px, 5vw, 72px);
+  --max: 1160px;
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*,*::before,*::after{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img,svg{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+ul{ margin:0; padding:0; list-style:none; }
+h1,h2,h3,p{ margin:0; }
+button{ font-family:inherit; background:none; border:none; padding:0; cursor:pointer; color:inherit; }
+
+:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.skip-link{
+  position:absolute; left:-999px; top:0;
+  background:var(--ink); color:#fff; padding:8px 14px; font-family:var(--font-mono); font-size:12px; z-index:999;
+}
+.skip-link:focus{ left:12px; top:12px; }
+
+.container{
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--edge);
+}
+
+/* ============================================================
+   BLUEPRINT LINES — fixed, subtle, ambient background texture
+   ============================================================ */
+.canvas{
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.canvas__grid{
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 84px 84px;
+}
+.canvas__grid::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to right, var(--grid-line-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-strong) 1px, transparent 1px);
+  background-size: 336px 336px;
+}
+.canvas__diagonals{
+  position:absolute; inset:0;
+  background-image: repeating-linear-gradient(
+    -45deg, transparent, transparent 46px, var(--grid-line) 46px, var(--grid-line) 47px
+  );
+}
+@media (max-width: 640px){
+  .canvas{ display:none; }
+}
+
+header, main, footer{ position:relative; z-index:1; }
+
+/* ============================================================
+   ICONS
+   ============================================================ */
+.icon{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+
+/* ============================================================
+   NAV — plain bordered bar
+   ============================================================ */
+.nav{
+  position: sticky; top:0; z-index:50;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.nav__inner{
+  max-width: var(--max); margin:0 auto; padding: 14px var(--edge);
+  display:flex; align-items:center; gap:28px;
+}
+.nav__brand{
+  font-family: var(--font-display); font-weight:700; font-size:13px;
+  width:32px; height:32px; border-radius:9px;
+  background: var(--ink); color: #fff;
+  display:flex; align-items:center; justify-content:center;
+  letter-spacing: -0.02em; flex-shrink:0;
+}
+.nav__links{
+  display:flex; align-items:center; gap:26px; flex:1;
+  font-family: var(--font-body); font-size:14px; font-weight:500; color: var(--soft);
+}
+.nav__links a{ transition: color .15s ease; }
+.nav__links a:hover{ color: var(--ink); }
+
+.nav__socials{ display:flex; align-items:center; gap:16px; color: var(--soft); }
+.nav__socials a{ display:flex; transition: color .15s ease; }
+.nav__socials a:hover{ color: var(--ink); }
+
+.nav__toggle{ display:none; color: var(--ink); padding:4px; }
+
+@media (max-width: 760px){
+  .nav__links{ position:fixed; top:64px; left: var(--edge); right: var(--edge);
+    background: var(--bg); border:1px solid var(--line); border-radius:12px;
+    flex-direction:column; align-items:flex-start; gap:2px; padding:8px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+    opacity:0; visibility:hidden; transform: translateY(-6px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s;
+  }
+  .nav__links a{ width:100%; padding:10px 8px; }
+  .nav__links.is-open{ opacity:1; visibility:visible; transform:translateY(0); }
+  .nav__toggle{ display:flex; }
+}
+
+/* ============================================================
+   REVEAL / MOTION
+   ============================================================ */
+.reveal{ opacity:0; transform: translateY(10px); transition: opacity .5s ease, transform .5s ease; }
+.reveal.in-view{ opacity:1; transform:none; }
+.reveal-delay-1{ transition-delay:.06s; }
+.reveal-delay-2{ transition-delay:.12s; }
+.reveal-delay-3{ transition-delay:.18s; }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
+  *{ animation:none !important; }
+}
+
+/* ============================================================
+   SECTION SCAFFOLD — one consistent heading style, no eyebrows
+   ============================================================ */
+.section{ border-top: 1px solid var(--line); padding: 64px 0; }
+.section__head{ margin-bottom: 36px; }
+.section__title{
+  font-family: var(--font-display); font-weight:700; color: var(--ink);
+  font-size: clamp(24px, 2.6vw, 30px); letter-spacing:-0.01em;
+}
+.section__count{ color: var(--faint); font-weight:500; font-size: 0.62em; margin-left:6px; }
+.section__intro{
+  margin-top: 14px; max-width: 58ch;
+  font-family: var(--font-body); font-weight:400;
+  font-size: clamp(14.5px, 1.4vw, 16px); line-height:1.7; color: var(--soft);
+}
+
+.link-underline{
+  font-family: var(--font-body); font-size:13.5px; font-weight:500; color: var(--soft);
+  display:inline-flex; align-items:center; gap:5px;
+  border-bottom: 1px solid var(--line-strong); padding-bottom:2px;
+  transition: color .15s ease, border-color .15s ease;
+}
+.link-underline:hover{ color: var(--ink); border-color: var(--ink); }
+.link-underline .icon{ width:12px; height:12px; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{ padding: 40px 0 32px; }
+.hero__inner{ max-width: 640px; }
+
+.hero__avatar{
+  width:72px; height:72px; border-radius:50%;
+  border:1px solid var(--line);
+  background: var(--tag-bg);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:19px; color:var(--soft);
+  margin-bottom: 16px;
+}
+.hero__name{
+  font-family: var(--font-display); font-weight:700;
+  font-size: clamp(28px, 4vw, 36px); line-height:1.1; letter-spacing:-0.015em;
+}
+.hero__check{
+  display:inline-flex; vertical-align: middle; margin-left:8px;
+  width: 0.48em; height:0.48em; border-radius:50%;
+  background: var(--ink); color: #fff; align-items:center; justify-content:center;
+}
+.hero__check .icon{ width:58%; height:58%; stroke-width:2.6; }
+.hero__role{
+  margin-top:6px; font-family: var(--font-body); font-size:14.5px; color: var(--soft);
+}
+.hero__role .dot{ color: var(--line-strong); margin:0 8px; }
+
+.hero__spec{
+  margin-top: 20px;
+  display:grid; grid-template-columns: 1fr 1fr; gap: 8px 32px;
+}
+.spec-row{
+  display:flex; align-items:center; gap:10px;
+}
+.spec-icon{ color: var(--soft); display:flex; }
+.spec-value{ font-size:14px; color: var(--ink); }
+.spec-value a{ border-bottom:1px solid var(--line-strong); transition: border-color .15s ease, color .15s ease; }
+.spec-value a:hover{ border-color: var(--ink); }
+
+@media (max-width: 560px){
+  .hero__spec{ grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about__statement{ max-width: 900px; }
+.about__statement-lead{
+  font-family: var(--font-display); font-weight:600;
+  font-size: clamp(24px, 3.6vw, 38px); line-height:1.35; letter-spacing:-0.01em;
+  color: var(--ink);
+}
+.about__statement-lead mark{
+  background: var(--tag-bg); color: var(--ink);
+  border-radius:4px; padding: 1px 6px;
+}
+.about__statement-sub{
+  margin-top: 24px;
+  font-family: var(--font-body); font-weight:400;
+  font-size: clamp(15px, 1.6vw, 17px); line-height:1.7;
+  color: var(--soft);
+  max-width: 58ch;
+}
+.about__statement-sub u{
+  color: var(--ink); text-decoration:none;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+/* ============================================================
+   STACK — technical specification sheet
+   ============================================================ */
+.stack__table{ border-top: 1px solid var(--line); }
+.stack__row{
+  display:grid; grid-template-columns: 200px 1fr; column-gap:32px;
+  align-items:start;
+  padding: 14px 0; border-bottom: 1px solid var(--line);
+}
+.stack__label{
+  display:flex; align-items:baseline; gap:10px; padding-top:6px;
+}
+.stack__num{
+  font-family: var(--font-mono); font-size:12px; font-weight:400;
+  letter-spacing:0.02em; color: var(--faint);
+}
+.stack__name{
+  font-family: var(--font-body); font-size:14.5px; font-weight:600;
+  letter-spacing:-0.005em; color: var(--ink);
+}
+
+.stack__pills{ display:flex; flex-wrap:wrap; gap:8px; }
+.pill{
+  display:inline-flex; align-items:center; gap:7px; width:fit-content;
+  padding: 7px 13px 7px 10px; border-radius:999px;
+  border:1px solid var(--line); background: var(--surface);
+  font-family: var(--font-body); font-size:13.5px; font-weight:500;
+  color: var(--ink); white-space:nowrap;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.pill:hover{
+  border-color: var(--line-strong);
+  background: var(--surface-hover);
+}
+.pill__icon{ width:13px; height:13px; flex-shrink:0; fill: var(--soft); transition: fill .15s ease; }
+.pill:hover .pill__icon{ fill: var(--ink); }
+
+@media (max-width: 700px){
+  .stack__row{ grid-template-columns: 1fr; row-gap:10px; padding: 12px 0; }
+  .stack__label{ padding-top:0; }
+}
+
+/* .tag — small neutral chip, shared by Experience tags */
+.tag{
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  font-family: var(--font-body); font-size:12.5px; font-weight:500; color: var(--soft);
+  border-radius: 6px; background: var(--tag-bg);
+  padding: 6px 10px; letter-spacing:0.01em;
+  transition: background .15s ease, color .15s ease;
+}
+.tag:hover{ background: var(--line); color: var(--ink); }
+.tag--ghost{ font-size:12.5px; padding:6px 10px; }
+
+/* ============================================================
+   PROJECTS — editorial two-up grid
+   ============================================================ */
+.projects{ padding: 96px 0; }
+
+.projects__grid{
+  margin-top: 48px;
+  display:grid; grid-template-columns: 1fr 1fr; gap: 64px;
+}
+
+.project-card{
+  display:block;
+  border: 1px solid #E8E8E8;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color .2s ease;
+}
+.project-card:hover{ border-color: var(--line-strong); }
+
+.project-card__media{
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--tag-bg);
+  display:block;
+}
+.project-card__media svg{
+  width:100%; height:100%; display:block;
+  transition: transform .6s cubic-bezier(.2,.8,.2,1);
+}
+.project-card:hover .project-card__media svg{ transform: scale(1.045); }
+
+.project-card__overlay{
+  position:absolute; inset:0;
+  display:flex; align-items:flex-end; justify-content:flex-start;
+  padding: 22px;
+  background: rgba(24,24,27,0);
+  opacity:0;
+  transition: opacity .3s ease, background-color .3s ease;
+}
+.project-card:hover .project-card__overlay{
+  opacity:1;
+  background: rgba(24,24,27,0.26);
+}
+.project-card__cta{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family: var(--font-body); font-size:13px; font-weight:600; color:#fff;
+  padding: 9px 16px; border-radius:999px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.35);
+  backdrop-filter: blur(6px);
+  transform: translateY(8px);
+  transition: transform .35s ease;
+}
+.project-card:hover .project-card__cta{ transform: translateY(0); }
+.project-card__cta .icon{ width:13px; height:13px; }
+
+.project-card__body{ padding: 0 28px 30px; margin-top: 32px; }
+.project-card__title{
+  font-family: var(--font-display); font-weight:700;
+  font-size: clamp(18px, 2vw, 21px); letter-spacing:-0.01em; color: var(--ink);
+}
+.project-card__desc{
+  margin-top: 16px;
+  font-family: var(--font-body); font-size:14.5px; line-height:1.65; color: var(--soft);
+  max-width: 44ch;
+}
+.project-card__meta{
+  margin-top: 18px; display:flex; align-items:center; gap:8px;
+  font-family: var(--font-mono); font-size:11px; letter-spacing:0.04em; text-transform:uppercase;
+  color: var(--faint);
+}
+.project-card__meta .dot{ color: var(--line-strong); }
+
+@media (max-width: 820px){
+  .projects__grid{ grid-template-columns: 1fr; gap: 56px; }
+}
+@media (max-width: 560px){
+  .projects{ padding: 64px 0; }
+  .project-card__body{ padding: 0 20px 24px; margin-top: 24px; }
+}
+
+/* ============================================================
+   GAME MODE — a site-wide platformer overlay, no dedicated section.
+   Toggle in the nav turns real page elements into jump platforms
+   and drops a little character + gems across the whole page.
+   ============================================================ */
+:root{
+  --gm-accent: #5B5FEF;
+  --gm-accent-soft: rgba(91,95,239,0.4);
+}
+
+.gm-toggle-wrap{ position:relative; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.gm-toggle{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family: var(--font-mono); font-size:11.5px; font-weight:600; letter-spacing:0.03em;
+  color: var(--soft); border:1px solid var(--line); border-radius:999px;
+  padding:6px 12px 6px 10px; transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.gm-toggle:hover{ border-color:var(--line-strong); color:var(--ink); }
+.gm-toggle__dot{ width:7px; height:7px; border-radius:50%; background:var(--faint); flex-shrink:0; transition: background-color .15s ease, box-shadow .15s ease; }
+.gm-toggle[aria-pressed="true"]{ color:var(--gm-accent); border-color: var(--gm-accent-soft); background: rgba(91,95,239,0.07); }
+.gm-toggle[aria-pressed="true"] .gm-toggle__dot{ background:var(--gm-accent); box-shadow:0 0 0 3px rgba(91,95,239,0.18); }
+
+.gm-info{
+  width:19px; height:19px; border-radius:50%; border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-family:var(--font-mono); font-size:10.5px; color:var(--faint);
+  transition: color .15s ease, border-color .15s ease;
+}
+.gm-info:hover{ color:var(--ink); border-color:var(--line-strong); }
+
+.gm-popover{
+  position:absolute; top:calc(100% + 10px); right:0; z-index:120;
+  width:224px; background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:14px 16px; box-shadow:0 16px 40px -16px rgba(0,0,0,0.28);
+  font-family:var(--font-body); font-size:12.5px; line-height:1.6; color:var(--soft);
+}
+.gm-popover p + p{ margin-top:6px; }
+.gm-popover strong{ color:var(--ink); }
+.gm-popover[hidden]{ display:none; }
+
+@media (max-width:760px){
+  .gm-toggle__label{ display:none; }
+  .gm-toggle{ padding:6px 8px; }
+}
+
+.gm-hud{
+  position:fixed; top:14px; right:14px; z-index:130;
+  display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+}
+.gm-hud[hidden]{ display:none; }
+.gm-counter{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--font-mono); font-size:12.5px; font-weight:600; color:#fff;
+  background:rgba(24,24,27,0.85); backdrop-filter:blur(6px);
+  padding:7px 13px; border-radius:999px;
+  box-shadow:0 12px 28px -12px rgba(0,0,0,0.45);
+}
+.gm-counter svg{ width:12px; height:12px; flex-shrink:0; }
+.gm-counter.gm-pulse{ animation: gmPulse .5s ease; }
+@keyframes gmPulse{ 0%{transform:scale(1);} 45%{transform:scale(1.16);} 100%{transform:scale(1);} }
+
+.gm-lives{
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(24,24,27,0.85); backdrop-filter:blur(6px);
+  padding:6px 11px; border-radius:999px;
+  box-shadow:0 12px 28px -12px rgba(0,0,0,0.45);
+}
+.gm-lives svg{ width:13px; height:13px; }
+.gm-lives svg.is-lost{ opacity:0.25; }
+.gm-lives.gm-shake{ animation: gmShakeHeart .4s ease; }
+@keyframes gmShakeHeart{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-3px);} 75%{transform:translateX(3px);} }
+
+.gm-timer{
+  font-family:var(--font-mono); font-size:11px; font-weight:600; color:#fff;
+  background:rgba(24,24,27,0.85); backdrop-filter:blur(6px);
+  padding:6px 12px; border-radius:999px;
+  box-shadow:0 12px 28px -12px rgba(0,0,0,0.45);
+}
+
+.gm-toast{
+  position:fixed; top:70px; left:50%; z-index:132;
+  transform: translate(-50%, -8px);
+  font-family:var(--font-body); font-size:13px; font-weight:600; color:#fff;
+  background:rgba(24,24,27,0.92); backdrop-filter:blur(6px);
+  padding:9px 16px; border-radius:10px; max-width:min(320px, 80vw); text-align:center;
+  box-shadow:0 16px 32px -14px rgba(0,0,0,0.5);
+  opacity:0; pointer-events:none; transition: opacity .25s ease, transform .25s ease;
+}
+.gm-toast.is-visible{ opacity:1; transform: translate(-50%, 0); }
+
+.gm-modal-backdrop{
+  position:fixed; inset:0; z-index:140;
+  background:rgba(24,24,27,0.55); backdrop-filter:blur(3px);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  opacity:0; pointer-events:none; transition: opacity .25s ease;
+}
+.gm-modal-backdrop.is-visible{ opacity:1; pointer-events:auto; }
+.gm-modal{
+  background:var(--surface); border-radius:16px; padding:28px 26px;
+  max-width:340px; width:100%; text-align:center;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,0.4);
+  transform: translateY(10px) scale(0.97); transition: transform .25s ease;
+}
+.gm-modal-backdrop.is-visible .gm-modal{ transform: translateY(0) scale(1); }
+.gm-modal__icon{ font-size:34px; margin-bottom:6px; line-height:1; }
+.gm-modal__title{ font-family:var(--font-display); font-weight:700; font-size:20px; color:var(--ink); margin-bottom:8px; }
+.gm-modal__body{ font-family:var(--font-body); font-size:13.5px; line-height:1.6; color:var(--soft); margin-bottom:20px; }
+.gm-modal__stat{ font-family:var(--font-mono); font-size:12px; color:var(--gm-accent); margin-bottom:18px; }
+.gm-modal__actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.gm-modal__btn{
+  font-family:var(--font-body); font-size:13.5px; font-weight:600; color:#fff;
+  background:var(--ink); padding:10px 18px; border-radius:999px; transition: background-color .15s ease;
+}
+.gm-modal__btn:hover{ background:#000; }
+.gm-modal__btn--ghost{ background:transparent; color:var(--soft); border:1px solid var(--line); }
+.gm-modal__btn--ghost:hover{ color:var(--ink); border-color:var(--line-strong); }
+
+.gm-particle{
+  position:fixed; top:0; left:0; z-index:126; pointer-events:none;
+  width:6px; height:6px; border-radius:50%; background:var(--gm-accent);
+  will-change: transform, opacity;
+}
+
+.gm-enemy{
+  position:fixed; top:0; left:0; z-index:123; pointer-events:none;
+  width:22px; height:16px;
+}
+.gm-enemy svg{ width:100%; height:100%; filter: drop-shadow(0 4px 8px rgba(220,38,38,0.4)); }
+.gm-enemy.is-facing-left{ transform: scaleX(-1); }
+
+body.gm-mode.gm-shake-screen{ animation: gmScreenShake .3s ease; }
+@keyframes gmScreenShake{
+  0%,100%{ margin-left:0; }
+  20%{ margin-left:-6px; }
+  40%{ margin-left:5px; }
+  60%{ margin-left:-4px; }
+  80%{ margin-left:3px; }
+}
+
+/* platforms are rendered as separate glowing line ledges, not outlines
+   wrapped around the real elements */
+.gm-platform-line{
+  position:fixed; top:0; left:0; z-index:122; pointer-events:none;
+  height:3px; border-radius:999px;
+  background: linear-gradient(90deg, transparent, var(--gm-accent) 12%, var(--gm-accent) 88%, transparent);
+  box-shadow: 0 0 10px 1px var(--gm-accent-soft), 0 0 3px var(--gm-accent);
+  opacity:0.9;
+}
+
+.gm-player{
+  position:fixed; top:0; left:0; z-index:125; pointer-events:none;
+  width:30px; height:30px; display:none;
+}
+.gm-player.is-active{ display:block; }
+.gm-player__body{
+  width:100%; height:100%; border-radius:50%;
+  background:var(--ink); position:relative;
+  box-shadow:0 8px 18px -6px rgba(0,0,0,0.45);
+}
+.gm-player__body::before, .gm-player__body::after{
+  content:""; position:absolute; top:36%; width:5px; height:5px; border-radius:50%; background:#fff;
+}
+.gm-player__body::before{ left:33%; }
+.gm-player__body::after{ left:33%; margin-left:9px; }
+.gm-player.is-facing-left .gm-player__body::before{ left:auto; right:33%; margin-right:9px; }
+.gm-player.is-facing-left .gm-player__body::after{ left:auto; right:33%; }
+.gm-player.is-hurt .gm-player__body{ background: #DC2626; }
+.gm-player.is-invulnerable{ animation: gmFlicker .12s steps(1) infinite; }
+@keyframes gmFlicker{ 50%{ opacity:0.25; } }
+
+.gm-gem{
+  position:fixed; top:0; left:0; z-index:124; pointer-events:none;
+  width:22px; height:22px;
+}
+.gm-gem svg{ width:100%; height:100%; filter: drop-shadow(0 6px 10px rgba(91,95,239,0.45)); }
+.gm-gem.is-collected{ display:none; }
+
+.gm-mobile-controls{
+  position:fixed; bottom:20px; left:0; right:0; z-index:130;
+  display:flex; justify-content:space-between; align-items:flex-end; padding:0 20px;
+  pointer-events:none;
+}
+.gm-mobile-controls[hidden]{ display:none; }
+.gm-dpad{ display:flex; gap:10px; pointer-events:auto; }
+.gm-ctrl{
+  width:52px; height:52px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(24,24,27,0.8); backdrop-filter:blur(6px); color:#fff;
+  border:1px solid rgba(255,255,255,0.14); pointer-events:auto;
+  -webkit-tap-highlight-color:transparent;
+}
+.gm-ctrl:active{ transform:scale(0.94); }
+.gm-ctrl .icon{ width:22px; height:22px; stroke:#fff; }
+
+@media (min-width:900px){
+  .gm-mobile-controls{ display:none !important; }
+}
+
+/* ============================================================
+   EXPERIENCE — clean stacked list, no schematic timeline
+   ============================================================ */
+.timeline{ position:relative; padding-left:26px; display:flex; flex-direction:column; gap:36px; }
+.timeline::before{
+  content:""; position:absolute; left:5px; top:6px; bottom:6px; width:1px; background: var(--line-strong);
+}
+.timeline__item{ position:relative; }
+.timeline__item::before{
+  content:""; position:absolute; left:-26px; top:9px; width:9px; height:9px;
+  background: var(--bg); border:1.5px solid var(--accent); border-radius:50%;
+}
+.timeline__item + .timeline__item{ padding-top:36px; border-top:1px solid var(--line); }
+
+.timeline__head{
+  width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  text-align:left;
+}
+.timeline__head-main{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.timeline__mark{
+  width:28px; height:28px; border-radius:7px; background:var(--ink); color:#fff;
+  font-family:var(--font-mono); font-weight:500; font-size:11px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.timeline__company{ font-family: var(--font-display); font-weight:700; font-size:18px; color:var(--ink); }
+.timeline__chevron{ color: var(--soft); transition: transform .25s ease; margin-top:0; flex-shrink:0; }
+.timeline__item.is-open .timeline__chevron{ transform: rotate(180deg); }
+
+.timeline__location{
+  display:flex; align-items:center; gap:7px;
+  font-family:var(--font-body); font-size:13px; font-weight:500; color: var(--soft); white-space:nowrap;
+}
+.status-dot{
+  width:7px; height:7px; border-radius:50%; background: var(--accent); flex-shrink:0;
+}
+
+.timeline__meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin: 14px 0 0 40px;
+  font-family: var(--font-body); font-size:13.5px; color: var(--soft);
+}
+.timeline__meta .role{ color: var(--ink); font-weight:600; }
+.timeline__meta .sep{ color: var(--line-strong); }
+.timeline__role-icon{
+  display:flex; align-items:center; justify-content:center;
+  width:24px; height:24px; border-radius:6px; border:1px solid var(--line); color: var(--soft);
+  margin-right:2px; flex-shrink:0;
+}
+.timeline__role-icon .icon{ width:13px; height:13px; }
+
+.timeline__body{
+  margin-left: 40px; overflow:hidden; max-height:0; transition: max-height .4s ease;
+}
+.timeline__item.is-open .timeline__body{ max-height: 620px; }
+.timeline__body-inner{ padding-top: 20px; padding-bottom: 6px; }
+.timeline__list{ display:flex; flex-direction:column; gap:9px; margin-bottom: 20px; max-width:62ch; }
+.timeline__list li{ position:relative; padding-left:16px; font-size:14px; line-height:1.6; color: var(--soft); }
+.timeline__list li::before{ content:"–"; position:absolute; left:0; color: var(--faint); }
+.timeline__tags{ display:flex; flex-wrap:wrap; gap:7px; }
+
+@media (max-width: 640px){
+  .timeline__head{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .timeline__meta, .timeline__body{ margin-left:0; }
+}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact__title{
+  font-family: var(--font-display); font-weight:700; letter-spacing:-0.015em;
+  font-size: clamp(32px, 5vw, 48px); margin-bottom: 20px; color: var(--ink);
+}
+.contact__lead{ max-width: 46ch; color: var(--soft); font-size:15.5px; line-height:1.7; margin-bottom: 32px; }
+
+.btn{
+  display:inline-flex; align-items:center; gap:9px;
+  font-family: var(--font-body); font-size:14px; font-weight:600; letter-spacing:0.01em;
+  padding: 12px 20px; border-radius:999px;
+  background: var(--ink); color: #fff;
+  transition: background-color .15s ease;
+}
+.btn:hover{ background:#000; }
+.btn .icon{ transition: transform .2s ease; }
+.btn:hover .icon{ transform: translate(2px,-2px); }
+
+.contact__socials{ display:flex; gap:24px; margin-top: 30px; }
+.contact__socials a{
+  font-family:var(--font-body); font-size:13.5px; font-weight:500; color: var(--soft);
+  display:inline-flex; align-items:center; gap:6px; border-bottom:1px solid var(--line-strong);
+  padding-bottom:2px; transition: color .15s ease, border-color .15s ease;
+}
+.contact__socials a:hover{ color: var(--ink); border-color: var(--ink); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer{ padding: 26px 0 36px; border-top:1px solid var(--line); }
+.footer__inner{
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  font-family: var(--font-body); font-size:13px; color: var(--faint);
+}
+.footer__top{ display:inline-flex; align-items:center; gap:6px; transition: color .15s ease; color: var(--soft); }
+.footer__top:hover{ color: var(--ink); }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<div class="canvas" aria-hidden="true">
+  <div class="canvas__grid"></div>
+  <div class="canvas__diagonals"></div>
+</div>
+
+<!-- ================= NAV ================= -->
+<header class="nav">
+  <div class="nav__inner">
+    <a href="#top" class="nav__brand">MM</a>
+    <nav class="nav__links" id="navLinks">
+      <a href="#about">About</a>
+      <a href="#stack">Stack</a>
+      <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="gm-toggle-wrap" id="gmToggleWrap">
+      <button class="gm-toggle" id="gmToggle" type="button" aria-pressed="false" aria-label="Toggle game mode">
+        <span class="gm-toggle__dot"></span><span class="gm-toggle__label">GAME MODE</span>
+      </button>
+      <button class="gm-info" id="gmInfoBtn" type="button" aria-label="Game mode info">i</button>
+      <div class="gm-popover" id="gmPopover" hidden>
+        <p><strong>Game mode</strong> turns the page itself into a platformer.</p>
+        <p>Glowing lines are ledges. Arrow/A/D to move, Space/W/↑ to jump — press again mid-air to double jump.</p>
+        <p>Collect every gem, dodge the bugs. 3 lives. Beat your best time!</p>
+      </div>
+    </div>
+
+    <div class="nav__socials">
+      <a href="https://github.com/yourusername" aria-label="GitHub" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+      </a>
+      <a href="https://linkedin.com/in/yourusername" aria-label="LinkedIn" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/><path d="M9 21v-9m0 0c0-1.7 1.3-3 3-3s3 1.3 3 3v6m0 0v-3c0-1.7 1.3-3 3-3s3 1.3 3 3v6h-4v-6"/></svg>
+      </a>
+    </div>
+    <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <svg class="icon" viewBox="0 0 24 24" id="navToggleIcon"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ================= GAME MODE OVERLAY (site-wide, no dedicated section) ================= -->
+<div class="gm-hud" id="gmHud" hidden>
+  <div class="gm-counter" id="gmCounter">
+    <svg viewBox="0 0 24 24" fill="#5B5FEF" stroke="none"><path d="M12 2 L20 9 L12 22 L4 9 Z"/></svg>
+    <span id="gmCollected">0</span>/<span id="gmTotal">0</span>
+  </div>
+  <div class="gm-lives" id="gmLives" aria-label="Lives remaining"></div>
+  <div class="gm-timer" id="gmTimer">0:00</div>
+</div>
+
+<div class="gm-toast" id="gmToast"></div>
+
+<div class="gm-modal-backdrop" id="gmWinModal">
+  <div class="gm-modal">
+    <div class="gm-modal__icon">🏆</div>
+    <div class="gm-modal__title">You explored it all!</div>
+    <div class="gm-modal__body">Every gem collected, no shortcuts — kind of like how Mapule ships projects. Thanks for playing through the portfolio.</div>
+    <div class="gm-modal__stat" id="gmWinStat"></div>
+    <div class="gm-modal__actions">
+      <button class="gm-modal__btn" id="gmWinReplay" type="button">Play again</button>
+      <a class="gm-modal__btn gm-modal__btn--ghost" href="#contact" id="gmWinContact">Say hi →</a>
+    </div>
+  </div>
+</div>
+
+<div class="gm-modal-backdrop" id="gmLoseModal">
+  <div class="gm-modal">
+    <div class="gm-modal__icon">🐞</div>
+    <div class="gm-modal__title">Bug got you</div>
+    <div class="gm-modal__body">Out of lives. Every dev hits a bug now and then — the trick is retrying.</div>
+    <div class="gm-modal__stat" id="gmLoseStat"></div>
+    <div class="gm-modal__actions">
+      <button class="gm-modal__btn" id="gmLoseRetry" type="button">Retry</button>
+      <button class="gm-modal__btn gm-modal__btn--ghost" id="gmLoseExit" type="button">Exit game mode</button>
+    </div>
+  </div>
+</div>
+
+<div class="gm-player" id="gmPlayer" aria-hidden="true">
+  <div class="gm-player__body"></div>
+</div>
+
+<div class="gm-mobile-controls" id="gmMobileControls" hidden>
+  <div class="gm-dpad">
+    <button class="gm-ctrl" id="gmLeftBtn" type="button" aria-label="Move left">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="gm-ctrl" id="gmRightBtn" type="button" aria-label="Move right">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+  <button class="gm-ctrl" id="gmJumpBtn" type="button" aria-label="Jump">
+    <svg class="icon" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+</div>
+
+<main id="main">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="top">
+
+    <div class="container hero__inner">
+      <div class="hero__profile reveal">
+        <div class="hero__avatar">MM</div>
+        <h1 class="hero__name">
+          Mapule Mbuzwana
+        </h1>
+        <p class="hero__role">Full Stack Developer <span class="dot">/</span> Design Engineer</p>
+      </div>
+
+      <ul class="hero__spec reveal reveal-delay-1">
+        <li class="spec-row">
+          <span class="spec-icon"><svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+          <span class="spec-value">Design Engineer @ Excellent Services</span>
+        </li>
+        <li class="spec-row">
+          <span class="spec-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/></svg></span>
+          <span class="spec-value"><a href="mailto:mbuzwanamapule@gmail.com">mbuzwanamapule@gmail.com</a></span>
+        </li>
+        <li class="spec-row">
+          <span class="spec-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          <span class="spec-value">South Africa</span>
+        </li>
+        <li class="spec-row">
+          <span class="spec-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg></span>
+          <span class="spec-value">069 239 6132</span>
+        </li>
+        <li class="spec-row">
+          <span class="spec-icon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span class="spec-value">Open to full-time &amp; contract</span>
+        </li>
+        <li class="spec-row">
+          <span class="spec-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M15 7h3a5 5 0 0 1 0 10h-3M9 17H6A5 5 0 0 1 6 7h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span>
+          <span class="spec-value"><a href="https://mapule.dev" target="_blank" rel="noopener">mapule.dev</a></span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about" class="section about">
+    <div class="container">
+      <div class="about__statement reveal">
+        <p class="about__statement-lead">
+          Building digital products with a strong focus on <mark>thoughtful design</mark>,
+          <mark>scalable engineering</mark>, and <mark>intuitive user experiences</mark>.
+        </p>
+        <p class="about__statement-sub">
+          Every project is shaped by <u>simplicity</u>, <u>attention to detail</u>, and the belief
+          that great products are defined by both how they work and how they feel.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= STACK ================= -->
+  <section id="stack" class="section stack">
+    <div class="container">
+      <div class="section__head reveal">
+        <h2 class="section__title">Stack</h2>
+      </div>
+
+      <div class="stack__table reveal">
+        <div class="stack__row">
+          <div class="stack__label"><span class="stack__num">01</span><span class="stack__name">Languages</span></div>
+          <div class="stack__pills">
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/></svg><span>TypeScript</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z"/></svg><span>JavaScript</span></span>
+          </div>
+        </div>
+        <div class="stack__row">
+          <div class="stack__label"><span class="stack__num">02</span><span class="stack__name">Frontend</span></div>
+          <div class="stack__pills">
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"/></svg><span>React</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M18.665 21.978C16.758 23.255 14.465 24 12 24 5.377 24 0 18.623 0 12S5.377 0 12 0s12 5.377 12 12c0 3.583-1.574 6.801-4.067 9.001L9.219 7.2H7.2v9.596h1.615V9.251l9.85 12.727Zm-3.332-8.533 1.6 2.061V7.2h-1.6v6.245Z"/></svg><span>Next.js</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"/></svg><span>React Native</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z"/></svg><span>HTML5</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M0 0v20.16A3.84 3.84 0 0 0 3.84 24h16.32A3.84 3.84 0 0 0 24 20.16V3.84A3.84 3.84 0 0 0 20.16 0Zm14.256 13.08c1.56 0 2.28 1.08 2.304 2.64h-1.608c.024-.288-.048-.6-.144-.84-.096-.192-.288-.264-.552-.264-.456 0-.696.264-.696.84-.024.576.288.888.768 1.08.72.288 1.608.744 1.92 1.296q.432.648.432 1.656c0 1.608-.912 2.592-2.496 2.592-1.656 0-2.4-1.032-2.424-2.688h1.68c0 .792.264 1.176.792 1.176.264 0 .456-.072.552-.24.192-.312.24-1.176-.048-1.512-.312-.408-.912-.6-1.32-.816q-.828-.396-1.224-.936c-.24-.36-.36-.888-.36-1.536 0-1.44.936-2.472 2.424-2.448m5.4 0c1.584 0 2.304 1.08 2.328 2.64h-1.608c0-.288-.048-.6-.168-.84-.096-.192-.264-.264-.528-.264-.48 0-.72.264-.72.84s.288.888.792 1.08c.696.288 1.608.744 1.92 1.296.264.432.408.984.408 1.656.024 1.608-.888 2.592-2.472 2.592-1.68 0-2.424-1.056-2.448-2.688h1.68c0 .744.264 1.176.792 1.176.264 0 .456-.072.552-.24.216-.312.264-1.176-.048-1.512-.288-.408-.888-.6-1.32-.816-.552-.264-.96-.576-1.2-.936s-.36-.888-.36-1.536c-.024-1.44.912-2.472 2.4-2.448m-11.031.018c.711-.006 1.419.198 1.839.63.432.432.672 1.128.648 1.992H9.336c.024-.456-.096-.792-.432-.96-.312-.144-.768-.048-.888.24-.12.264-.192.576-.168.864v3.504c0 .744.264 1.128.768 1.128a.65.65 0 0 0 .552-.264c.168-.24.192-.552.168-.84h1.776c.096 1.632-.984 2.712-2.568 2.688-1.536 0-2.496-.864-2.472-2.472v-4.032c0-.816.24-1.44.696-1.848.432-.408 1.146-.624 1.857-.63"/></svg><span>CSS3</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M12.001,4.8c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 C13.666,10.618,15.027,12,18.001,12c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C16.337,6.182,14.976,4.8,12.001,4.8z M6.001,12c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 c1.177,1.194,2.538,2.576,5.512,2.576c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C10.337,13.382,8.976,12,6.001,12z"/></svg><span>Tailwind CSS</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M22.219 11.784 11.784 22.219c-.407.407-.407 1.068 0 1.476.407.407 1.068.407 1.476 0L23.695 13.26c.407-.408.407-1.069 0-1.476-.408-.407-1.069-.407-1.476 0ZM20.132.305.305 20.132c-.407.407-.407 1.068 0 1.476.408.407 1.069.407 1.476 0L21.608 1.781c.407-.407.407-1.068 0-1.476-.408-.407-1.069-.407-1.476 0Z"/></svg><span>shadcn/ui</span></span>
+          </div>
+        </div>
+        <div class="stack__row">
+          <div class="stack__label"><span class="stack__num">03</span><span class="stack__name">Backend</span></div>
+          <div class="stack__pills">
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M11.998,24c-0.321,0-0.641-0.084-0.922-0.247l-2.936-1.737c-0.438-0.245-0.224-0.332-0.08-0.383 c0.585-0.203,0.703-0.25,1.328-0.604c0.065-0.037,0.151-0.023,0.218,0.017l2.256,1.339c0.082,0.045,0.197,0.045,0.272,0l8.795-5.076 c0.082-0.047,0.134-0.141,0.134-0.238V6.921c0-0.099-0.053-0.192-0.137-0.242l-8.791-5.072c-0.081-0.047-0.189-0.047-0.271,0 L3.075,6.68C2.99,6.729,2.936,6.825,2.936,6.921v10.15c0,0.097,0.054,0.189,0.139,0.235l2.409,1.392 c1.307,0.654,2.108-0.116,2.108-0.89V7.787c0-0.142,0.114-0.253,0.256-0.253h1.115c0.139,0,0.255,0.112,0.255,0.253v10.021 c0,1.745-0.95,2.745-2.604,2.745c-0.508,0-0.909,0-2.026-0.551L2.28,18.675c-0.57-0.329-0.922-0.945-0.922-1.604V6.921 c0-0.659,0.353-1.275,0.922-1.603l8.795-5.082c0.557-0.315,1.296-0.315,1.848,0l8.794,5.082c0.57,0.329,0.924,0.944,0.924,1.603 v10.15c0,0.659-0.354,1.273-0.924,1.604l-8.794,5.078C12.643,23.916,12.324,24,11.998,24z M19.099,13.993 c0-1.9-1.284-2.406-3.987-2.763c-2.731-0.361-3.009-0.548-3.009-1.187c0-0.528,0.235-1.233,2.258-1.233 c1.807,0,2.473,0.389,2.747,1.607c0.024,0.115,0.129,0.199,0.247,0.199h1.141c0.071,0,0.138-0.031,0.186-0.081 c0.048-0.054,0.074-0.123,0.067-0.196c-0.177-2.098-1.571-3.076-4.388-3.076c-2.508,0-4.004,1.058-4.004,2.833 c0,1.925,1.488,2.457,3.895,2.695c2.88,0.282,3.103,0.703,3.103,1.269c0,0.983-0.789,1.402-2.642,1.402 c-2.327,0-2.839-0.584-3.011-1.742c-0.02-0.124-0.126-0.215-0.253-0.215h-1.137c-0.141,0-0.254,0.112-0.254,0.253 c0,1.482,0.806,3.248,4.655,3.248C17.501,17.007,19.099,15.91,19.099,13.993z"/></svg><span>Node.js</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M12.262 16.666h1.146l6.975-9.325H19.22zm9.778 1.441v.004l-4.334-5.706-.557.74 4.873 6.682H.945V4.173h9.505l5.026 6.7.574-.772-4.374-5.928h.003l-.719-.945H0v17.544h24zM10.917 8.705a3.8 3.8 0 0 0-1.292-1.183q-.796-.45-1.916-.45c-.746 0-1.37.14-1.906.424a3.76 3.76 0 0 0-1.31 1.12 4.9 4.9 0 0 0-.75 1.581 7.17 7.17 0 0 0 0 3.696c.148.567.402 1.101.75 1.573a3.5 3.5 0 0 0 1.31 1.066q.803.39 1.906.389 1.77 0 2.739-.868.966-.867 1.328-2.457h-1.139q-.271 1.084-.977 1.734-.704.651-1.952.65-.812 0-1.392-.342a3.1 3.1 0 0 1-.957-.869 3.5 3.5 0 0 1-.551-1.182 5 5 0 0 1-.17-1.133 9 9 0 0 0-.015-.286 4.5 4.5 0 0 1 .015-.829c.047-.418.147-.83.296-1.223A3.7 3.7 0 0 1 5.54 9.05a2.9 2.9 0 0 1 .922-.742q.541-.28 1.246-.28c.47 0 .869.093 1.23.28q.541.281.922.742.379.461.587 1.057t.225 1.246H5.625l.004.957h6.182a7.3 7.3 0 0 0-.18-1.924 4.9 4.9 0 0 0-.715-1.68z"/></svg><span>Express.js</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M8.55 6.32 2.9 12l5.65 5.68 1.65-1.66L6.2 12l3.99-4.02zm6.9 0-1.65 1.66L17.8 12l-3.99 4.02 1.65 1.66L21.1 12z"/></svg><span>REST APIs</span></span>
+          </div>
+        </div>
+        <div class="stack__row">
+          <div class="stack__label"><span class="stack__num">04</span><span class="stack__name">Database</span></div>
+          <div class="stack__pills">
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M17.193 9.555c-1.264-5.58-4.252-7.414-4.573-8.115-.28-.394-.53-.954-.735-1.44-.036.495-.055.685-.523 1.184-.723.566-4.438 3.682-4.74 10.02-.282 5.912 4.27 9.435 4.888 9.884l.07.05A73.49 73.49 0 0111.91 24h.481c.114-1.032.284-2.056.51-3.07.417-.296.604-.463.85-.693a11.342 11.342 0 003.639-8.464c.01-.814-.103-1.662-.197-2.218zm-5.336 8.195s0-8.291.275-8.29c.213 0 .49 10.695.49 10.695-.381-.045-.765-1.76-.765-2.405z"/></svg><span>MongoDB</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M23.5594 14.7228a.5269.5269 0 0 0-.0563-.1191c-.139-.2632-.4768-.3418-1.0074-.2321-1.6533.3411-2.2935.1312-2.5256-.0191 1.342-2.0482 2.445-4.522 3.0411-6.8297.2714-1.0507.7982-3.5237.1222-4.7316a1.5641 1.5641 0 0 0-.1509-.235C21.6931.9086 19.8007.0248 17.5099.0005c-1.4947-.0158-2.7705.3461-3.1161.4794a9.449 9.449 0 0 0-.5159-.0816 8.044 8.044 0 0 0-1.3114-.1278c-1.1822-.0184-2.2038.2642-3.0498.8406-.8573-.3211-4.7888-1.645-7.2219.0788C.9359 2.1526.3086 3.8733.4302 6.3043c.0409.818.5069 3.334 1.2423 5.7436.4598 1.5065.9387 2.7019 1.4334 3.582.553.9942 1.1259 1.5933 1.7143 1.7895.4474.1491 1.1327.1441 1.8581-.7279.8012-.9635 1.5903-1.8258 1.9446-2.2069.4351.2355.9064.3625 1.39.3772a.0569.0569 0 0 0 .0004.0041 11.0312 11.0312 0 0 0-.2472.3054c-.3389.4302-.4094.5197-1.5002.7443-.3102.064-1.1344.2339-1.1464.8115-.0025.1224.0329.2309.0919.3268.2269.4231.9216.6097 1.015.6331 1.3345.3335 2.5044.092 3.3714-.6787-.017 2.231.0775 4.4174.3454 5.0874.2212.5529.7618 1.9045 2.4692 1.9043.2505 0 .5263-.0291.8296-.0941 1.7819-.3821 2.5557-1.1696 2.855-2.9059.1503-.8707.4016-2.8753.5388-4.1012.0169-.0703.0357-.1207.057-.1362.0007-.0005.0697-.0471.4272.0307a.3673.3673 0 0 0 .0443.0068l.2539.0223.0149.001c.8468.0384 1.9114-.1426 2.5312-.4308.6438-.2988 1.8057-1.0323 1.5951-1.6698zM2.371 11.8765c-.7435-2.4358-1.1779-4.8851-1.2123-5.5719-.1086-2.1714.4171-3.6829 1.5623-4.4927 1.8367-1.2986 4.8398-.5408 6.108-.13-.0032.0032-.0066.0061-.0098.0094-2.0238 2.044-1.9758 5.536-1.9708 5.7495-.0002.0823.0066.1989.0162.3593.0348.5873.0996 1.6804-.0735 2.9184-.1609 1.1504.1937 2.2764.9728 3.0892.0806.0841.1648.1631.2518.2374-.3468.3714-1.1004 1.1926-1.9025 2.1576-.5677.6825-.9597.5517-1.0886.5087-.3919-.1307-.813-.5871-1.2381-1.3223-.4796-.839-.9635-2.0317-1.4155-3.5126zm6.0072 5.0871c-.1711-.0428-.3271-.1132-.4322-.1772.0889-.0394.2374-.0902.4833-.1409 1.2833-.2641 1.4815-.4506 1.9143-1.0002.0992-.126.2116-.2687.3673-.4426a.3549.3549 0 0 0 .0737-.1298c.1708-.1513.2724-.1099.4369-.0417.156.0646.3078.26.3695.4752.0291.1016.0619.2945-.0452.4444-.9043 1.2658-2.2216 1.2494-3.1676 1.0128zm2.094-3.988-.0525.141c-.133.3566-.2567.6881-.3334 1.003-.6674-.0021-1.3168-.2872-1.8105-.8024-.6279-.6551-.9131-1.5664-.7825-2.5004.1828-1.3079.1153-2.4468.079-3.0586-.005-.0857-.0095-.1607-.0122-.2199.2957-.2621 1.6659-.9962 2.6429-.7724.4459.1022.7176.4057.8305.928.5846 2.7038.0774 3.8307-.3302 4.7363-.084.1866-.1633.3629-.2311.5454zm7.3637 4.5725c-.0169.1768-.0358.376-.0618.5959l-.146.4383a.3547.3547 0 0 0-.0182.1077c-.0059.4747-.054.6489-.115.8693-.0634.2292-.1353.4891-.1794 1.0575-.11 1.4143-.8782 2.2267-2.4172 2.5565-1.5155.3251-1.7843-.4968-2.0212-1.2217a6.5824 6.5824 0 0 0-.0769-.2266c-.2154-.5858-.1911-1.4119-.1574-2.5551.0165-.5612-.0249-1.9013-.3302-2.6462.0044-.2932.0106-.5909.019-.8918a.3529.3529 0 0 0-.0153-.1126 1.4927 1.4927 0 0 0-.0439-.208c-.1226-.4283-.4213-.7866-.7797-.9351-.1424-.059-.4038-.1672-.7178-.0869.067-.276.1831-.5875.309-.9249l.0529-.142c.0595-.16.134-.3257.213-.5012.4265-.9476 1.0106-2.2453.3766-5.1772-.2374-1.0981-1.0304-1.6343-2.2324-1.5098-.7207.0746-1.3799.3654-1.7088.5321a5.6716 5.6716 0 0 0-.1958.1041c.0918-1.1064.4386-3.1741 1.7357-4.4823a4.0306 4.0306 0 0 1 .3033-.276.3532.3532 0 0 0 .1447-.0644c.7524-.5706 1.6945-.8506 2.802-.8325.4091.0067.8017.0339 1.1742.081 1.939.3544 3.2439 1.4468 4.0359 2.3827.8143.9623 1.2552 1.9315 1.4312 2.4543-1.3232-.1346-2.2234.1268-2.6797.779-.9926 1.4189.543 4.1729 1.2811 5.4964.1353.2426.2522.4522.2889.5413.2403.5825.5515.9713.7787 1.2552.0696.087.1372.1714.1885.245-.4008.1155-1.1208.3825-1.0552 1.717-.0123.1563-.0423.4469-.0834.8148-.0461.2077-.0702.4603-.0994.7662zm.8905-1.6211c-.0405-.8316.2691-.9185.5967-1.0105a2.8566 2.8566 0 0 0 .135-.0406 1.202 1.202 0 0 0 .1342.103c.5703.3765 1.5823.4213 3.0068.1344-.2016.1769-.5189.3994-.9533.6011-.4098.1903-1.0957.333-1.7473.3636-.7197.0336-1.0859-.0807-1.1721-.151zm.5695-9.2712c-.0059.3508-.0542.6692-.1054 1.0017-.055.3576-.112.7274-.1264 1.1762-.0142.4368.0404.8909.0932 1.3301.1066.887.216 1.8003-.2075 2.7014a3.5272 3.5272 0 0 1-.1876-.3856c-.0527-.1276-.1669-.3326-.3251-.6162-.6156-1.1041-2.0574-3.6896-1.3193-4.7446.3795-.5427 1.3408-.5661 2.1781-.463zm.2284 7.0137a12.3762 12.3762 0 0 0-.0853-.1074l-.0355-.0444c.7262-1.1995.5842-2.3862.4578-3.4385-.0519-.4318-.1009-.8396-.0885-1.2226.0129-.4061.0666-.7543.1185-1.0911.0639-.415.1288-.8443.1109-1.3505.0134-.0531.0188-.1158.0118-.1902-.0457-.4855-.5999-1.938-1.7294-3.253-.6076-.7073-1.4896-1.4972-2.6889-2.0395.5251-.1066 1.2328-.2035 2.0244-.1859 2.0515.0456 3.6746.8135 4.8242 2.2824a.908.908 0 0 1 .0667.1002c.7231 1.3556-.2762 6.2751-2.9867 10.5405zm-8.8166-6.1162c-.025.1794-.3089.4225-.6211.4225a.5821.5821 0 0 1-.0809-.0056c-.1873-.026-.3765-.144-.5059-.3156-.0458-.0605-.1203-.178-.1055-.2844.0055-.0401.0261-.0985.0925-.1488.1182-.0894.3518-.1226.6096-.0867.3163.0441.6426.1938.6113.4186zm7.9305-.4114c.0111.0792-.049.201-.1531.3102-.0683.0717-.212.1961-.4079.2232a.5456.5456 0 0 1-.075.0052c-.2935 0-.5414-.2344-.5607-.3717-.024-.1765.2641-.3106.5611-.352.297-.0414.6111.0088.6356.1851z"/></svg><span>PostgreSQL</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M19.455 8.369c-.538-.748-1.778-2.285-3.681-4.569-.826-.991-1.535-1.832-1.884-2.245a146 146 0 0 0-.488-.576l-.207-.245-.113-.133-.022-.032-.01-.005L12.57 0l-.609.488c-1.555 1.246-2.828 2.851-3.681 4.64-.523 1.064-.864 2.105-1.043 3.176-.047.241-.088.489-.121.738-.209-.017-.421-.028-.632-.033-.018-.001-.035-.002-.059-.003a7.46 7.46 0 0 0-2.28.274l-.317.089-.163.286c-.765 1.342-1.198 2.869-1.252 4.416-.07 2.01.477 3.954 1.583 5.625 1.082 1.633 2.61 2.882 4.42 3.611l.236.095.071.025.003-.001a9.59 9.59 0 0 0 2.941.568q.171.006.342.006c1.273 0 2.513-.249 3.69-.742l.008.004.313-.145a9.63 9.63 0 0 0 3.927-3.335c1.01-1.49 1.577-3.234 1.641-5.042.075-2.161-.643-4.304-2.133-6.371m-7.083 6.695c.328 1.244.264 2.44-.191 3.558-1.135-1.12-1.967-2.352-2.475-3.665-.543-1.404-.87-2.74-.974-3.975.48.157.922.366 1.315.622 1.132.737 1.914 1.902 2.325 3.461zm.207 6.022c.482.368.99.712 1.513 1.028-.771.21-1.565.302-2.369.273a8 8 0 0 1-.373-.022c.458-.394.869-.823 1.228-1.279zm1.347-6.431c-.516-1.957-1.527-3.437-3.002-4.398-.647-.421-1.385-.741-2.194-.95.011-.134.026-.268.043-.4.014-.113.03-.216.046-.313.133-.689.332-1.37.589-2.025.099-.25.206-.499.321-.74l.004-.008c.177-.358.376-.719.61-1.105l.092-.152-.003-.001c.544-.851 1.197-1.627 1.942-2.311l.288.341c.672.796 1.304 1.548 1.878 2.237 1.291 1.549 2.966 3.583 3.612 4.48 1.277 1.771 1.893 3.579 1.83 5.375-.049 1.395-.461 2.755-1.195 3.933-.694 1.116-1.661 2.05-2.8 2.708-.636-.318-1.559-.839-2.539-1.599.79-1.575.952-3.28.479-5.072zm-2.575 5.397c-.725.939-1.587 1.55-2.09 1.856-.081-.029-.163-.06-.243-.093l-.065-.026c-1.49-.616-2.747-1.656-3.635-3.01-.907-1.384-1.356-2.993-1.298-4.653.041-1.19.338-2.327.882-3.379.316-.07.638-.114.96-.131l.084-.002c.162-.003.324-.003.478 0 .227.011.454.035.677.07.073 1.513.445 3.145 1.105 4.852.637 1.644 1.694 3.162 3.144 4.515z"/></svg><span>Firebase</span></span>
+          </div>
+        </div>
+        <div class="stack__row">
+          <div class="stack__label"><span class="stack__num">05</span><span class="stack__name">AI &amp; Workflow</span></div>
+          <div class="stack__pills">
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg><span>Cursor</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg><span>Claude</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="13" rx="3.2"/><path d="M7.3 17.5v3.1c0 .47.53.73.9.45L12 17.9H7.3z"/></svg><span>ChatGPT</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M13.09 23.549a1.54 1.54 0 0 1-2.18 0L.451 13.089a1.54 1.54 0 0 1 0-2.179l7.191-7.19 2.733 2.733a1.85 1.85 0 0 0 .964 2.326v6.66a1.849 1.849 0 1 0 1.54 0V8.957l2.508 2.508a1.85 1.85 0 1 0 1.09-1.09l-2.634-2.634a1.85 1.85 0 0 0-2.378-2.377L8.73 2.63 10.91.451a1.54 1.54 0 0 1 2.179 0l10.459 10.46a1.54 1.54 0 0 1 0 2.179z"/></svg><span>Git</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span>GitHub</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z"/></svg><span>Docker</span></span>
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="m12 1.608 12 20.784H0Z"/></svg><span>Vercel</span></span>
+          </div>
+        </div>
+        <div class="stack__row">
+          <div class="stack__label"><span class="stack__num">06</span><span class="stack__name">Design</span></div>
+          <div class="stack__pills">
+            <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.014-4.49-4.49S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068v-2.97H8.148zm7.704 0h-.098c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h.098c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.49-4.49 4.49zm-.097-7.509c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h.098c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-.098z"/></svg><span>Figma</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PROJECTS ================= -->
+  <section id="projects" class="section projects">
+    <div class="container">
+      <div class="section__head reveal">
+        <h2 class="section__title">Selected Projects</h2>
+        <p class="section__intro">
+          A closer look at two products built end to end for Excellent Services —
+          the public-facing website that brings customers in, and the internal
+          system that runs the business behind the scenes.
+        </p>
+      </div>
+
+      <div class="projects__grid reveal">
+
+        <!-- Project 1 — Excellent Services Website -->
+        <a href="#" class="project-card" aria-label="View Excellent Services Website project">
+          <div class="project-card__media">
+            <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Excellent Services website preview">
+              <rect width="800" height="500" fill="var(--tag-bg)"/>
+
+              <!-- top nav -->
+              <rect x="0" y="0" width="800" height="64" fill="var(--surface)"/>
+              <line x1="0" y1="64" x2="800" y2="64" stroke="var(--line)" stroke-width="1"/>
+              <rect x="40" y="22" width="20" height="20" rx="5" fill="var(--ink)"/>
+              <rect x="72" y="28" width="72" height="8" rx="3" fill="var(--ink)"/>
+              <rect x="420" y="29" width="52" height="6" rx="3" fill="var(--soft)" opacity="0.55"/>
+              <rect x="492" y="29" width="40" height="6" rx="3" fill="var(--soft)" opacity="0.55"/>
+              <rect x="552" y="29" width="56" height="6" rx="3" fill="var(--soft)" opacity="0.55"/>
+              <rect x="668" y="20" width="96" height="28" rx="14" fill="var(--ink)"/>
+              <rect x="686" y="31" width="60" height="6" rx="3" fill="var(--bg)"/>
+
+              <!-- hero -->
+              <rect x="40" y="120" width="230" height="16" rx="4" fill="var(--ink)"/>
+              <rect x="40" y="146" width="170" height="16" rx="4" fill="var(--ink)"/>
+              <rect x="40" y="184" width="260" height="8" rx="3" fill="var(--soft)" opacity="0.5"/>
+              <rect x="40" y="200" width="200" height="8" rx="3" fill="var(--soft)" opacity="0.5"/>
+              <rect x="40" y="228" width="150" height="36" rx="18" fill="var(--accent)"/>
+              <rect x="66" y="242" width="98" height="8" rx="3" fill="#fff"/>
+
+              <!-- hero visual -->
+              <rect x="400" y="100" width="360" height="200" rx="14" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+              <circle cx="500" cy="180" r="18" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+              <path d="M440 260 L500 210 L540 240 L600 190 L720 260 Z" fill="var(--tag-bg)"/>
+
+              <line x1="0" y1="340" x2="800" y2="340" stroke="var(--line)" stroke-width="1"/>
+              <rect x="40" y="364" width="120" height="8" rx="3" fill="var(--faint)"/>
+
+              <!-- service cards -->
+              <g>
+                <rect x="40" y="388" width="228" height="90" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="60" y="406" width="20" height="20" rx="6" fill="var(--tag-bg)" stroke="var(--line)"/>
+                <rect x="60" y="438" width="120" height="8" rx="3" fill="var(--ink)"/>
+                <rect x="60" y="454" width="150" height="6" rx="3" fill="var(--soft)" opacity="0.45"/>
+              </g>
+              <g>
+                <rect x="286" y="388" width="228" height="90" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="306" y="406" width="20" height="20" rx="6" fill="var(--tag-bg)" stroke="var(--line)"/>
+                <rect x="306" y="438" width="120" height="8" rx="3" fill="var(--ink)"/>
+                <rect x="306" y="454" width="150" height="6" rx="3" fill="var(--soft)" opacity="0.45"/>
+              </g>
+              <g>
+                <rect x="532" y="388" width="228" height="90" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="552" y="406" width="20" height="20" rx="6" fill="var(--tag-bg)" stroke="var(--line)"/>
+                <rect x="552" y="438" width="120" height="8" rx="3" fill="var(--ink)"/>
+                <rect x="552" y="454" width="150" height="6" rx="3" fill="var(--soft)" opacity="0.45"/>
+              </g>
+            </svg>
+            <div class="project-card__overlay">
+              <span class="project-card__cta">
+                View Project
+                <svg class="icon" viewBox="0 0 24 24" style="stroke:#fff"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="project-card__body">
+            <h3 class="project-card__title">Excellent Services Website</h3>
+            <p class="project-card__desc">Business website for Excellent Services, focused on showcasing products, generating leads and managing customer enquiries.</p>
+            <div class="project-card__meta"><span>2026</span><span class="dot">/</span><span>Live</span></div>
+          </div>
+        </a>
+
+        <!-- Project 2 — Excellent OS -->
+        <a href="#" class="project-card" aria-label="View Excellent OS project">
+          <div class="project-card__media">
+            <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Excellent OS dashboard preview">
+              <rect width="800" height="500" fill="var(--surface)"/>
+
+              <!-- sidebar -->
+              <rect x="0" y="0" width="168" height="500" fill="var(--ink)"/>
+              <rect x="28" y="28" width="32" height="32" rx="8" fill="#fff" opacity="0.14"/>
+              <rect x="37" y="41" width="14" height="6" rx="2" fill="#fff" opacity="0.65"/>
+
+              <rect x="12" y="88" width="144" height="32" rx="10" fill="#fff" opacity="0.08"/>
+              <rect x="28" y="94" width="20" height="20" rx="6" fill="var(--accent)"/>
+              <rect x="60" y="100" width="72" height="8" rx="3" fill="#fff" opacity="0.9"/>
+
+              <rect x="28" y="142" width="20" height="20" rx="6" fill="#fff" opacity="0.16"/>
+              <rect x="60" y="148" width="60" height="8" rx="3" fill="#fff" opacity="0.32"/>
+              <rect x="28" y="190" width="20" height="20" rx="6" fill="#fff" opacity="0.16"/>
+              <rect x="60" y="196" width="70" height="8" rx="3" fill="#fff" opacity="0.32"/>
+              <rect x="28" y="238" width="20" height="20" rx="6" fill="#fff" opacity="0.16"/>
+              <rect x="60" y="244" width="54" height="8" rx="3" fill="#fff" opacity="0.32"/>
+              <rect x="28" y="286" width="20" height="20" rx="6" fill="#fff" opacity="0.16"/>
+              <rect x="60" y="292" width="64" height="8" rx="3" fill="#fff" opacity="0.32"/>
+
+              <!-- topbar -->
+              <rect x="168" y="0" width="632" height="64" fill="var(--surface)"/>
+              <line x1="168" y1="64" x2="800" y2="64" stroke="var(--line)" stroke-width="1"/>
+              <rect x="196" y="20" width="240" height="24" rx="12" fill="var(--tag-bg)"/>
+              <circle cx="214" cy="32" r="5" fill="none" stroke="var(--faint)" stroke-width="1.4"/>
+              <line x1="218" y1="36" x2="222" y2="40" stroke="var(--faint)" stroke-width="1.4"/>
+              <rect x="668" y="20" width="66" height="24" rx="12" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+              <text x="701" y="36" font-family="var(--font-mono)" font-size="10" fill="var(--ink)" text-anchor="middle">AI</text>
+              <circle cx="758" cy="32" r="14" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+
+              <!-- overview label -->
+              <rect x="196" y="76" width="90" height="8" rx="3" fill="var(--faint)"/>
+
+              <!-- stat cards -->
+              <g>
+                <rect x="196" y="92" width="135" height="76" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="212" y="110" width="50" height="6" rx="3" fill="var(--faint)"/>
+                <text x="212" y="146" font-family="var(--font-mono)" font-size="20" font-weight="700" fill="var(--ink)">128</text>
+              </g>
+              <g>
+                <rect x="347" y="92" width="135" height="76" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="363" y="110" width="50" height="6" rx="3" fill="var(--faint)"/>
+                <text x="363" y="146" font-family="var(--font-mono)" font-size="20" font-weight="700" fill="var(--ink)">342</text>
+              </g>
+              <g>
+                <rect x="498" y="92" width="135" height="76" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="514" y="110" width="50" height="6" rx="3" fill="var(--faint)"/>
+                <text x="514" y="146" font-family="var(--font-mono)" font-size="20" font-weight="700" fill="var(--ink)">57</text>
+              </g>
+              <g>
+                <rect x="649" y="92" width="135" height="76" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="665" y="110" width="50" height="6" rx="3" fill="var(--faint)"/>
+                <text x="665" y="146" font-family="var(--font-mono)" font-size="20" font-weight="700" fill="var(--ink)">1.2k</text>
+              </g>
+
+              <!-- table -->
+              <rect x="196" y="196" width="588" height="274" rx="10" fill="var(--surface)" stroke="var(--line)" stroke-width="1"/>
+              <rect x="196" y="196" width="588" height="36" fill="var(--tag-bg)"/>
+              <text x="216" y="218" font-family="var(--font-body)" font-size="10" fill="var(--soft)">Customer</text>
+              <text x="392" y="218" font-family="var(--font-body)" font-size="10" fill="var(--soft)">Quotation</text>
+              <text x="492" y="218" font-family="var(--font-body)" font-size="10" fill="var(--soft)">Status</text>
+              <text x="700" y="218" font-family="var(--font-body)" font-size="10" fill="var(--soft)">Amount</text>
+
+              <line x1="196" y1="291" x2="784" y2="291" stroke="var(--line)" stroke-width="1"/>
+              <line x1="196" y1="350" x2="784" y2="350" stroke="var(--line)" stroke-width="1"/>
+              <line x1="196" y1="409" x2="784" y2="409" stroke="var(--line)" stroke-width="1"/>
+
+              <g>
+                <circle cx="228" cy="261" r="7" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="246" y="257" width="110" height="8" rx="3" fill="var(--ink)" opacity="0.85"/>
+                <rect x="392" y="257" width="64" height="8" rx="3" fill="var(--faint)" opacity="0.7"/>
+                <rect x="492" y="250" width="70" height="22" rx="11" fill="var(--accent)" fill-opacity="0.12" stroke="var(--accent)" stroke-opacity="0.5" stroke-width="1"/>
+                <rect x="700" y="257" width="56" height="8" rx="3" fill="var(--ink)"/>
+              </g>
+              <g>
+                <circle cx="228" cy="320" r="7" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="246" y="316" width="90" height="8" rx="3" fill="var(--ink)" opacity="0.85"/>
+                <rect x="392" y="316" width="64" height="8" rx="3" fill="var(--faint)" opacity="0.7"/>
+                <rect x="492" y="309" width="70" height="22" rx="11" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="700" y="316" width="56" height="8" rx="3" fill="var(--ink)"/>
+              </g>
+              <g>
+                <circle cx="228" cy="379" r="7" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="246" y="375" width="120" height="8" rx="3" fill="var(--ink)" opacity="0.85"/>
+                <rect x="392" y="375" width="64" height="8" rx="3" fill="var(--faint)" opacity="0.7"/>
+                <rect x="492" y="368" width="70" height="22" rx="11" fill="var(--accent)" fill-opacity="0.12" stroke="var(--accent)" stroke-opacity="0.5" stroke-width="1"/>
+                <rect x="700" y="375" width="56" height="8" rx="3" fill="var(--ink)"/>
+              </g>
+              <g>
+                <circle cx="228" cy="438" r="7" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="246" y="434" width="80" height="8" rx="3" fill="var(--ink)" opacity="0.85"/>
+                <rect x="392" y="434" width="64" height="8" rx="3" fill="var(--faint)" opacity="0.7"/>
+                <rect x="492" y="427" width="70" height="22" rx="11" fill="var(--tag-bg)" stroke="var(--line)" stroke-width="1"/>
+                <rect x="700" y="434" width="56" height="8" rx="3" fill="var(--ink)"/>
+              </g>
+            </svg>
+            <div class="project-card__overlay">
+              <span class="project-card__cta">
+                View Project
+                <svg class="icon" viewBox="0 0 24 24" style="stroke:#fff"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </span>
+            </div>
+          </div>
+          <div class="project-card__body">
+            <h3 class="project-card__title">Excellent OS</h3>
+            <p class="project-card__desc">An internal business operating system for quotations, customers, products, documents and AI-powered workflows.</p>
+            <div class="project-card__meta"><span>2026</span><span class="dot">/</span><span>In active use</span></div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EXPERIENCE ================= -->
+  <section id="experience" class="section experience">
+    <div class="container">
+      <div class="section__head reveal">
+        <h2 class="section__title">Experience</h2>
+      </div>
+
+      <div class="timeline reveal">
+        <div class="timeline__item is-open" data-timeline-item>
+          <button class="timeline__head" data-toggle aria-expanded="true">
+            <div class="timeline__head-main">
+              <span class="timeline__mark">ES</span>
+              <h3 class="timeline__company">Excellent Services</h3>
+            </div>
+          </button>
+
+          <div class="timeline__meta">
+            <span class="timeline__role-icon"><svg class="icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+            <span class="role">Design Engineer</span>
+            <span class="sep">/</span>
+            <span>Full-time</span>
+            <span class="sep">/</span>
+            <span>06.2024 — 07.2026</span>
+            <span class="sep">/</span>
+            <span>2y 1m</span>
+            <svg class="icon timeline__chevron" viewBox="0 0 24 24" style="margin-left:auto"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+
+          <div class="timeline__body" data-toggle-body>
+            <div class="timeline__body-inner">
+              <ul class="timeline__list">
+                <li>Designed modern, intuitive interfaces for the company's web presence.</li>
+                <li>Translated designs into responsive, production-ready frontend code.</li>
+                <li>Built and maintained frontend and backend functionality.</li>
+                <li>Improved usability and overall user experience across key flows.</li>
+                <li>Worked across design and engineering to deliver polished web experiences, end to end.</li>
+              </ul>
+              <div class="timeline__tags">
+                <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/></svg><span>TypeScript</span></span>
+                <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M18.665 21.978C16.758 23.255 14.465 24 12 24 5.377 24 0 18.623 0 12S5.377 0 12 0s12 5.377 12 12c0 3.583-1.574 6.801-4.067 9.001L9.219 7.2H7.2v9.596h1.615V9.251l9.85 12.727Zm-3.332-8.533 1.6 2.061V7.2h-1.6v6.245Z"/></svg><span>Next.js</span></span>
+                <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M12.001,4.8c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 C13.666,10.618,15.027,12,18.001,12c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C16.337,6.182,14.976,4.8,12.001,4.8z M6.001,12c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 c1.177,1.194,2.538,2.576,5.512,2.576c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C10.337,13.382,8.976,12,6.001,12z"/></svg><span>Tailwind CSS</span></span>
+                <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.014-4.49-4.49S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068v-2.97H8.148zm7.704 0h-.098c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h.098c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.49-4.49 4.49zm-.097-7.509c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h.098c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-.098z"/></svg><span>Figma</span></span>
+                <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.41l-2.34-2.34a1.003 1.003 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg><span>UI/UX Design</span></span>
+                <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M11.998,24c-0.321,0-0.641-0.084-0.922-0.247l-2.936-1.737c-0.438-0.245-0.224-0.332-0.08-0.383 c0.585-0.203,0.703-0.25,1.328-0.604c0.065-0.037,0.151-0.023,0.218,0.017l2.256,1.339c0.082,0.045,0.197,0.045,0.272,0l8.795-5.076 c0.082-0.047,0.134-0.141,0.134-0.238V6.921c0-0.099-0.053-0.192-0.137-0.242l-8.791-5.072c-0.081-0.047-0.189-0.047-0.271,0 L3.075,6.68C2.99,6.729,2.936,6.825,2.936,6.921v10.15c0,0.097,0.054,0.189,0.139,0.235l2.409,1.392 c1.307,0.654,2.108-0.116,2.108-0.89V7.787c0-0.142,0.114-0.253,0.256-0.253h1.115c0.139,0,0.255,0.112,0.255,0.253v10.021 c0,1.745-0.95,2.745-2.604,2.745c-0.508,0-0.909,0-2.026-0.551L2.28,18.675c-0.57-0.329-0.922-0.945-0.922-1.604V6.921 c0-0.659,0.353-1.275,0.922-1.603l8.795-5.082c0.557-0.315,1.296-0.315,1.848,0l8.794,5.082c0.57,0.329,0.924,0.944,0.924,1.603 v10.15c0,0.659-0.354,1.273-0.924,1.604l-8.794,5.078C12.643,23.916,12.324,24,11.998,24z M19.099,13.993 c0-1.9-1.284-2.406-3.987-2.763c-2.731-0.361-3.009-0.548-3.009-1.187c0-0.528,0.235-1.233,2.258-1.233 c1.807,0,2.473,0.389,2.747,1.607c0.024,0.115,0.129,0.199,0.247,0.199h1.141c0.071,0,0.138-0.031,0.186-0.081 c0.048-0.054,0.074-0.123,0.067-0.196c-0.177-2.098-1.571-3.076-4.388-3.076c-2.508,0-4.004,1.058-4.004,2.833 c0,1.925,1.488,2.457,3.895,2.695c2.88,0.282,3.103,0.703,3.103,1.269c0,0.983-0.789,1.402-2.642,1.402 c-2.327,0-2.839-0.584-3.011-1.742c-0.02-0.124-0.126-0.215-0.253-0.215h-1.137c-0.141,0-0.254,0.112-0.254,0.253 c0,1.482,0.806,3.248,4.655,3.248C17.501,17.007,19.099,15.91,19.099,13.993z"/></svg><span>Node.js</span></span>
+                <span class="pill"><svg class="pill__icon" viewBox="0 0 24 24"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"/></svg><span>React</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section id="contact" class="section contact">
+    <div class="container contact__inner">
+      <h2 class="contact__title reveal">Let's talk.</h2>
+      <p class="contact__lead reveal">
+        I'm open to full-stack and design engineering roles at product-focused teams.
+        If you're building something and think I'd be a good fit, I'd love to hear from you.
+      </p>
+      <a href="mailto:mbuzwanamapule@gmail.com" class="btn reveal">
+        mbuzwanamapule@gmail.com
+        <svg class="icon" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+      </a>
+      <div class="contact__socials reveal">
+        <a href="https://github.com/yourusername" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <span>© 2026 Mapule Mbuzwana</span>
+    <a href="#top" class="footer__top">Back to top ↑</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- mobile nav toggle ---------- */
+  var navToggle = document.getElementById('navToggle');
+  var navLinks = document.getElementById('navLinks');
+  if(navToggle){
+    navToggle.addEventListener('click', function(){
+      var open = navLinks.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    navLinks.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ navLinks.classList.remove('is-open'); });
+    });
+  }
+
+  /* ---------- scroll reveal ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window && !reduceMotion){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in-view'); });
+  }
+
+  /* ---------- experience expand/collapse ---------- */
+  document.querySelectorAll('[data-toggle]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var item = btn.closest('[data-timeline-item]');
+      var body = item.querySelector('[data-toggle-body]');
+      var isOpen = item.classList.contains('is-open');
+      item.classList.toggle('is-open', !isOpen);
+      btn.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+      body.style.maxHeight = !isOpen ? body.scrollHeight + 'px' : '0px';
+      window.dispatchEvent(new Event('gm:layout-changed'));
+    });
+  });
+  // initialise open state height correctly
+  document.querySelectorAll('.timeline__item.is-open [data-toggle-body]').forEach(function(body){
+    body.style.maxHeight = body.scrollHeight + 'px';
+  });
+})();
+</script>
+
+<!-- ---------- game mode: the whole page as a platformer ---------- -->
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var body = document.body;
+  var toggleBtn = document.getElementById('gmToggle');
+  var toggleWrap = document.getElementById('gmToggleWrap');
+  var infoBtn = document.getElementById('gmInfoBtn');
+  var popover = document.getElementById('gmPopover');
+  var hud = document.getElementById('gmHud');
+  var counterEl = document.getElementById('gmCounter');
+  var collectedEl = document.getElementById('gmCollected');
+  var totalEl = document.getElementById('gmTotal');
+  var livesEl = document.getElementById('gmLives');
+  var timerEl = document.getElementById('gmTimer');
+  var toastEl = document.getElementById('gmToast');
+  var playerEl = document.getElementById('gmPlayer');
+  var mobileControls = document.getElementById('gmMobileControls');
+  var btnLeft = document.getElementById('gmLeftBtn');
+  var btnRight = document.getElementById('gmRightBtn');
+  var btnJump = document.getElementById('gmJumpBtn');
+  var winModal = document.getElementById('gmWinModal');
+  var winStat = document.getElementById('gmWinStat');
+  var winReplay = document.getElementById('gmWinReplay');
+  var loseModal = document.getElementById('gmLoseModal');
+  var loseStat = document.getElementById('gmLoseStat');
+  var loseRetry = document.getElementById('gmLoseRetry');
+  var loseExit = document.getElementById('gmLoseExit');
+
+  if(!toggleBtn || !playerEl) return;
+
+  var GRAVITY = 0.6;
+  var JUMP_V = -13.5;
+  var AIR_JUMP_V = -11.5;
+  var MOVE_SPEED = 4.2;
+  var FRICTION = 0.82;
+  var PLAYER_R = 15;
+  var MAX_LIVES = 3;
+  var INVULN_MS = 1300;
+  var BEST_KEY = 'gm-best-time-v1';
+
+  // Game mode now only lives on the three section-title dividers
+  // (Stack, Selected Projects, Experience). No platforms, gems, or
+  // enemies in the hero, about, or contact sections.
+  var PLATFORM_SELECTOR = '.section__title';
+  var GEM_TARGETS = [
+    { sel: '#stack .section__title', msg: 'Skill token grabbed — that\'s the stack Mapule builds with.' },
+    { sel: '#projects .section__title', msg: 'Nice — the projects below are worth a scroll.' },
+    { sel: '#experience .section__title', msg: 'Last gem — check the experience timeline for the full story.' }
+  ];
+  var ENEMY_SELECTOR = '.section__title';
+  var ENEMY_H = 16, ENEMY_W = 22;
+
+  var active = false;
+  var paused = false;
+  var rafId = null;
+  var platforms = [];
+  var gems = [];
+  var enemies = [];
+  var particles = [];
+  var collected = 0;
+  var lives = MAX_LIVES;
+  var invulnerableUntil = 0;
+  var startTime = 0;
+  var elapsedMs = 0;
+  var toastTimer = null;
+  var keys = { left:false, right:false };
+  var jumpHeld = false;
+  var airJumpAvailable = true;
+  var player = { x:0, y:0, vx:0, vy:0, facing:1, grounded:false };
+  var recalcTimer = null;
+  var audioCtx = null;
+
+  function docX(rect){ return rect.left + window.scrollX; }
+  function docY(rect){ return rect.top + window.scrollY; }
+
+  // Section titles are block-level, so getBoundingClientRect() reports the
+  // full container width, not the width of the heading text itself. Use a
+  // Range to measure the actual glyph box so platform lines stay tight and
+  // small, matching just the heading — not the whole row.
+  function textRect(el){
+    try{
+      var range = document.createRange();
+      range.selectNodeContents(el);
+      var rect = range.getBoundingClientRect();
+      if(rect && rect.width > 0) return rect;
+    }catch(e){}
+    return el.getBoundingClientRect();
+  }
+
+  /* ---------- tiny sound effects, no assets ---------- */
+  function beep(freq, dur, type, vol){
+    if(reduceMotion) return;
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.value = vol || 0.08;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      osc.stop(audioCtx.currentTime + dur);
+    }catch(e){}
+  }
+  function sfxJump(){ beep(440, 0.12, 'square', 0.05); }
+  function sfxGem(){ beep(880, 0.1, 'triangle', 0.07); setTimeout(function(){ beep(1320, 0.12, 'triangle', 0.06); }, 60); }
+  function sfxHit(){ beep(140, 0.25, 'sawtooth', 0.08); }
+  function sfxStomp(){ beep(220, 0.1, 'square', 0.07); }
+  function sfxWin(){ beep(660,0.12,'triangle',0.07); setTimeout(function(){beep(880,0.12,'triangle',0.07);},110); setTimeout(function(){beep(1100,0.18,'triangle',0.08);},220); }
+
+  function showToast(msg){
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('is-visible'); }, 2200);
+  }
+
+  function formatTime(ms){
+    var s = Math.floor(ms / 1000);
+    var m = Math.floor(s / 60);
+    s = s % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function renderLives(){
+    livesEl.innerHTML = '';
+    for(var i = 0; i < MAX_LIVES; i++){
+      var lost = i >= lives;
+      livesEl.innerHTML += '<svg viewBox="0 0 24 24" class="' + (lost ? 'is-lost' : '') + '" fill="' + (lost ? '#71717A' : '#EF4444') + '" stroke="none"><path d="M12 21s-7.5-4.6-10.2-9.3C.3 8.6 1.7 5 5.2 4.2 7.6 3.6 9.9 4.7 12 7.1c2.1-2.4 4.4-3.5 6.8-2.9 3.5.8 4.9 4.4 3.4 7.5C19.5 16.4 12 21 12 21z"/></svg>';
+    }
+  }
+
+  function buildPlatforms(){
+    clearPlatformLines();
+    platforms = [];
+    document.querySelectorAll(PLATFORM_SELECTOR).forEach(function(el){
+      var r = textRect(el);
+      if(r.width < 4 || r.height < 4) return;
+      var lineW = Math.max(r.width + 10, 14);
+      var lineX = docX(r) - 5;
+      var lineEl = document.createElement('div');
+      lineEl.className = 'gm-platform-line';
+      lineEl.style.width = lineW + 'px';
+      document.body.appendChild(lineEl);
+      platforms.push({
+        x: lineX, y: docY(r), w: lineW, h: Math.max(r.height, 6),
+        lineX: lineX, lineW: lineW,
+        lineEl: lineEl
+      });
+    });
+  }
+
+  function clearPlatformLines(){
+    platforms.forEach(function(p){ if(p.lineEl && p.lineEl.parentNode) p.lineEl.parentNode.removeChild(p.lineEl); });
+  }
+
+  function buildGems(){
+    gems.forEach(function(g){ if(g.el && g.el.parentNode) g.el.parentNode.removeChild(g.el); });
+    gems = [];
+    GEM_TARGETS.forEach(function(target){
+      var el = document.querySelector(target.sel);
+      if(!el) return;
+      var r = textRect(el);
+      var gemEl = document.createElement('div');
+      gemEl.className = 'gm-gem';
+      gemEl.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2 L20 9 L12 22 L4 9 Z" fill="#5B5FEF"/><path d="M12 2 L20 9 L12 13 L4 9 Z" fill="#fff" opacity="0.55"/></svg>';
+      document.body.appendChild(gemEl);
+      gems.push({
+        el: gemEl,
+        selector: target.sel,
+        msg: target.msg,
+        x: docX(r) + r.width / 2,
+        y: docY(r) - 26,
+        collected: false,
+        floatT: Math.random() * Math.PI * 2
+      });
+    });
+    totalEl.textContent = gems.length;
+  }
+
+  function buildEnemies(){
+    enemies.forEach(function(e){ if(e.el && e.el.parentNode) e.el.parentNode.removeChild(e.el); });
+    enemies = [];
+    var nodes = document.querySelectorAll(ENEMY_SELECTOR);
+    nodes.forEach(function(el, idx){
+      if(idx % 2 !== 0) return; // every other target keeps some platforms enemy-free
+      var r = textRect(el);
+      if(r.width < 40) return;
+      var enemyEl = document.createElement('div');
+      enemyEl.className = 'gm-enemy';
+      enemyEl.innerHTML = '<svg viewBox="0 0 24 16"><ellipse cx="12" cy="9" rx="8" ry="6" fill="#DC2626"/><circle cx="12" cy="5" r="3.4" fill="#B91C1C"/><line x1="4" y1="6" x2="1" y2="3" stroke="#B91C1C" stroke-width="1.6"/><line x1="20" y1="6" x2="23" y2="3" stroke="#B91C1C" stroke-width="1.6"/><circle cx="10.3" cy="4.6" r="0.9" fill="#fff"/><circle cx="13.7" cy="4.6" r="0.9" fill="#fff"/></svg>';
+      document.body.appendChild(enemyEl);
+      var minX = docX(r) + 12, maxX = docX(r) + r.width - 12;
+      enemies.push({
+        el: enemyEl,
+        selector: null,
+        minX: minX, maxX: maxX,
+        x: (minX + maxX) / 2,
+        y: docY(r) - ENEMY_H,
+        vx: 1.1 + Math.random() * 0.6,
+        alive: true
+      });
+    });
+  }
+
+  function recalc(){
+    buildPlatforms();
+    gems.forEach(function(g){
+      if(g.collected) return;
+      var el = document.querySelector(g.selector);
+      if(!el) return;
+      var r = textRect(el);
+      g.x = docX(r) + r.width / 2;
+      g.y = docY(r) - 26;
+    });
+  }
+
+  function spawnParticles(x, y, color, count){
+    for(var i = 0; i < count; i++){
+      var angle = Math.random() * Math.PI * 2;
+      var speed = 1.5 + Math.random() * 2.5;
+      var el = document.createElement('div');
+      el.className = 'gm-particle';
+      if(color) el.style.background = color;
+      document.body.appendChild(el);
+      particles.push({
+        el: el, x: x, y: y,
+        vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1,
+        life: 1
+      });
+    }
+  }
+
+  function spawn(){
+    var first = platforms[0];
+    if(first){
+      player.x = first.x + Math.min(48, first.w / 4);
+      player.y = first.y - PLAYER_R;
+      player.grounded = true;
+    } else {
+      player.x = 60; player.y = 120;
+    }
+    player.vx = 0; player.vy = 0;
+    airJumpAvailable = true;
+    invulnerableUntil = performance.now() + 600;
+  }
+
+  function resetProgress(){
+    collected = 0;
+    collectedEl.textContent = 0;
+    lives = MAX_LIVES;
+    renderLives();
+    gems.forEach(function(g){ g.collected = false; g.el.classList.remove('is-collected'); });
+    enemies.forEach(function(e){ e.alive = true; e.el.hidden = false; });
+    startTime = performance.now();
+    elapsedMs = 0;
+  }
+
+  function activate(){
+    active = true;
+    paused = false;
+    body.classList.add('gm-mode');
+    toggleBtn.setAttribute('aria-pressed', 'true');
+    hud.hidden = false;
+    playerEl.classList.add('is-active');
+    playerEl.classList.remove('is-hurt');
+    if(window.innerWidth < 900) mobileControls.hidden = false;
+    buildGems();
+    buildPlatforms();
+    buildEnemies();
+    resetProgress();
+    spawn();
+    showToast('Collect all ' + gems.length + ' gems. Stomp bugs from above, avoid them from the side.');
+    if(!rafId) rafId = requestAnimationFrame(loop);
+  }
+
+  function deactivate(){
+    active = false;
+    paused = false;
+    body.classList.remove('gm-mode');
+    toggleBtn.setAttribute('aria-pressed', 'false');
+    hud.hidden = true;
+    playerEl.classList.remove('is-active');
+    mobileControls.hidden = true;
+    keys.left = false; keys.right = false;
+    winModal.classList.remove('is-visible');
+    loseModal.classList.remove('is-visible');
+    if(rafId){ cancelAnimationFrame(rafId); rafId = null; }
+    gems.forEach(function(g){ if(g.el && g.el.parentNode) g.el.parentNode.removeChild(g.el); });
+    enemies.forEach(function(e){ if(e.el && e.el.parentNode) e.el.parentNode.removeChild(e.el); });
+    particles.forEach(function(p){ if(p.el && p.el.parentNode) p.el.parentNode.removeChild(p.el); });
+    gems = []; enemies = []; particles = [];
+    clearPlatformLines();
+    platforms = [];
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if(active) deactivate(); else activate();
+  });
+
+  infoBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    popover.hidden = !popover.hidden;
+  });
+  document.addEventListener('click', function(e){
+    if(!popover.hidden && !toggleWrap.contains(e.target)){
+      popover.hidden = true;
+    }
+  });
+
+  function tryJump(){
+    if(!active || paused) return;
+    if(player.grounded){
+      player.vy = JUMP_V; player.grounded = false; airJumpAvailable = true;
+      sfxJump();
+    } else if(airJumpAvailable){
+      player.vy = AIR_JUMP_V; airJumpAvailable = false;
+      sfxJump();
+      spawnParticles(player.x, player.y + PLAYER_R, '#A1A1AA', 5);
+    }
+  }
+
+  window.addEventListener('keydown', function(e){
+    if(!active) return;
+    if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+    if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+    if(e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' '){
+      e.preventDefault();
+      if(!jumpHeld){ jumpHeld = true; tryJump(); }
+    }
+  });
+  window.addEventListener('keyup', function(e){
+    if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+    if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+    if(e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') jumpHeld = false;
+  });
+
+  function bindHold(el, onDown, onUp){
+    if(!el) return;
+    el.addEventListener('mousedown', onDown);
+    el.addEventListener('touchstart', function(e){ e.preventDefault(); onDown(); }, { passive:false });
+    ['mouseup','mouseleave','touchend','touchcancel'].forEach(function(ev){ el.addEventListener(ev, onUp); });
+  }
+  bindHold(btnLeft, function(){ keys.left = true; }, function(){ keys.left = false; });
+  bindHold(btnRight, function(){ keys.right = true; }, function(){ keys.right = false; });
+  if(btnJump){
+    btnJump.addEventListener('click', tryJump);
+    btnJump.addEventListener('touchstart', function(e){ e.preventDefault(); tryJump(); }, { passive:false });
+  }
+
+  window.addEventListener('resize', function(){
+    clearTimeout(recalcTimer);
+    recalcTimer = setTimeout(function(){ if(active) recalc(); }, 200);
+  });
+  window.addEventListener('gm:layout-changed', function(){
+    if(!active) return;
+    clearTimeout(recalcTimer);
+    recalcTimer = setTimeout(recalc, 450);
+  });
+
+  function loseLife(fromX){
+    if(performance.now() < invulnerableUntil) return;
+    lives--;
+    renderLives();
+    livesEl.classList.remove('gm-shake'); void livesEl.offsetWidth; livesEl.classList.add('gm-shake');
+    body.classList.remove('gm-shake-screen'); void body.offsetWidth; body.classList.add('gm-shake-screen');
+    playerEl.classList.add('is-hurt');
+    setTimeout(function(){ playerEl.classList.remove('is-hurt'); }, 300);
+    sfxHit();
+    spawnParticles(player.x, player.y, '#DC2626', 8);
+    player.vy = JUMP_V * 0.6;
+    player.vx = player.x < fromX ? -6 : 6;
+    invulnerableUntil = performance.now() + INVULN_MS;
+    if(lives <= 0){
+      endRun(false);
+    }
+  }
+
+  function endRun(won){
+    paused = true;
+    keys.left = false; keys.right = false;
+    var timeStr = formatTime(elapsedMs);
+    if(won){
+      sfxWin();
+      var best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10);
+      var isNew = !best || elapsedMs < best;
+      if(isNew) localStorage.setItem(BEST_KEY, String(Math.floor(elapsedMs)));
+      winStat.textContent = 'Time: ' + timeStr + (isNew ? '  •  New best!' : '  •  Best: ' + formatTime(best));
+      winModal.classList.add('is-visible');
+    } else {
+      loseStat.textContent = collected + ' / ' + gems.length + ' gems  •  ' + timeStr;
+      loseModal.classList.add('is-visible');
+    }
+  }
+
+  winReplay.addEventListener('click', function(){
+    winModal.classList.remove('is-visible');
+    buildGems(); buildPlatforms(); buildEnemies(); resetProgress(); spawn();
+    paused = false;
+  });
+  loseRetry.addEventListener('click', function(){
+    loseModal.classList.remove('is-visible');
+    buildGems(); buildPlatforms(); buildEnemies(); resetProgress(); spawn();
+    paused = false;
+  });
+  loseExit.addEventListener('click', function(){
+    deactivate();
+  });
+
+  function update(dtNow){
+    if(paused) return;
+    elapsedMs = dtNow - startTime;
+    timerEl.textContent = formatTime(elapsedMs);
+
+    if(keys.left){ player.vx = -MOVE_SPEED; player.facing = -1; }
+    else if(keys.right){ player.vx = MOVE_SPEED; player.facing = 1; }
+    else { player.vx *= FRICTION; }
+
+    player.x += player.vx;
+    var maxX = document.documentElement.scrollWidth - PLAYER_R;
+    if(player.x < PLAYER_R) player.x = PLAYER_R;
+    if(player.x > maxX) player.x = maxX;
+
+    player.vy += GRAVITY;
+    player.y += player.vy;
+    player.grounded = false;
+
+    if(player.vy >= 0){
+      for(var i = 0; i < platforms.length; i++){
+        var p = platforms[i];
+        var withinX = player.x + PLAYER_R * 0.6 > p.x && player.x - PLAYER_R * 0.6 < p.x + p.w;
+        var withinY = player.y + PLAYER_R >= p.y && player.y + PLAYER_R <= p.y + p.h + player.vy + 2;
+        if(withinX && withinY){
+          player.vy = 0;
+          player.y = p.y - PLAYER_R;
+          player.grounded = true;
+          airJumpAvailable = true;
+        }
+      }
+    }
+
+    gems.forEach(function(g){
+      if(g.collected) return;
+      if(!reduceMotion) g.floatT += 0.06;
+      var gy = g.y + (reduceMotion ? 0 : Math.sin(g.floatT) * 4);
+      var d = Math.hypot(player.x - g.x, player.y - gy);
+      if(d < PLAYER_R + 14){
+        g.collected = true;
+        g.el.classList.add('is-collected');
+        collected++;
+        collectedEl.textContent = collected;
+        counterEl.classList.remove('gm-pulse');
+        void counterEl.offsetWidth;
+        counterEl.classList.add('gm-pulse');
+        sfxGem();
+        spawnParticles(g.x, gy, '#5B5FEF', 10);
+        showToast(g.msg);
+        if(collected >= gems.length){
+          setTimeout(function(){ endRun(true); }, 250);
+        }
+      }
+    });
+
+    enemies.forEach(function(e){
+      if(!e.alive) return;
+      e.x += e.vx;
+      if(e.x < e.minX || e.x > e.maxX) e.vx *= -1;
+      e.x = Math.max(e.minX, Math.min(e.maxX, e.x));
+
+      var dx = player.x - e.x, dy = (player.y) - e.y;
+      if(Math.abs(dx) < PLAYER_R + ENEMY_W/2 - 4 && Math.abs(dy) < PLAYER_R + ENEMY_H/2){
+        if(player.vy > 0 && (player.y - PLAYER_R) < e.y){
+          e.alive = false;
+          e.el.hidden = true;
+          player.vy = JUMP_V * 0.55;
+          sfxStomp();
+          spawnParticles(e.x, e.y, '#DC2626', 6);
+          showToast('Squashed a bug.');
+        } else {
+          loseLife(e.x);
+        }
+      }
+    });
+
+    particles.forEach(function(p){
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.035;
+    });
+    particles = particles.filter(function(p){
+      if(p.life <= 0){ if(p.el.parentNode) p.el.parentNode.removeChild(p.el); return false; }
+      return true;
+    });
+
+    var docBottom = document.documentElement.scrollHeight;
+    if(player.y > docBottom + 200){
+      loseLife(player.x);
+      spawn();
+    }
+  }
+
+  function render(){
+    var scrollX = window.scrollX, scrollY = window.scrollY;
+    playerEl.style.transform = 'translate3d(' + (player.x - PLAYER_R - scrollX) + 'px,' + (player.y - PLAYER_R - scrollY) + 'px,0)';
+    playerEl.classList.toggle('is-facing-left', player.facing === -1);
+    playerEl.classList.toggle('is-invulnerable', performance.now() < invulnerableUntil);
+
+    platforms.forEach(function(p){
+      p.lineEl.style.transform = 'translate3d(' + (p.lineX - scrollX) + 'px,' + (p.y - scrollY) + 'px,0)';
+    });
+
+    gems.forEach(function(g){
+      if(g.collected) return;
+      var gy = g.y + (reduceMotion ? 0 : Math.sin(g.floatT) * 4);
+      g.el.style.transform = 'translate3d(' + (g.x - 11 - scrollX) + 'px,' + (gy - 11 - scrollY) + 'px,0)';
+    });
+
+    enemies.forEach(function(e){
+      if(!e.alive) return;
+      e.el.style.transform = 'translate3d(' + (e.x - ENEMY_W/2 - scrollX) + 'px,' + (e.y - scrollY) + 'px,0)';
+      e.el.classList.toggle('is-facing-left', e.vx < 0);
+    });
+
+    particles.forEach(function(p){
+      p.el.style.opacity = Math.max(p.life, 0);
+      p.el.style.transform = 'translate3d(' + (p.x - 3 - scrollX) + 'px,' + (p.y - 3 - scrollY) + 'px,0)';
+    });
+  }
+
+  function loop(now){
+    update(now);
+    render();
+    if(active){ rafId = requestAnimationFrame(loop); }
+    else { rafId = null; }
+  }
+})();
+</script>
+
+</body>
+</html>
